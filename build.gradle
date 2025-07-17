@@ -1,0 +1,87 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
+        maven { url = "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+version = "${mc_version}-${mod_version}"
+group = "net.idotf"
+archivesBaseName = "In_Distance_Of_The_Fog"
+
+sourceCompatibility = targetCompatibility = '1.8'
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
+
+minecraft {
+    version = "${mc_version}-${forge_version}"
+    runDir = 'run'
+    mappings = snapshot
+}
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'run/libs'
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'run/libs', include: ['*.jar'])
+}
+
+shadowJar {
+    classifier ''
+    configurations = [project.configurations.compile]
+   
+    exclude "dummyThing"
+    exclude "LICENSE.txt"
+    exclude "META-INF/LICENSE-notice.md"
+    exclude "META-INF/LICENSE.md"
+}
+
+reobf {
+    shadowJar { mappingType = 'SEARGE' }
+}
+
+tasks.build.dependsOn reobfShadowJar
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+    
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
+    
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": "InDistanceOfTheFog",
+            "Specification-Vendor": "InDistanceOfTheFogsareus",
+            "Specification-Version": "1",
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor": "InDistanceOfTheFogsareus",
+            "Implementation-Timestamp": "2017-09-17T00:00:00Z"
+        ])
+    }
+}
+
+runClient.outputs.upToDateWhen { false }
+runServer.outputs.upToDateWhen { false }
