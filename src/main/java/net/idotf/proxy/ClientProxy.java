@@ -5,6 +5,7 @@ import net.idotf.entity.herobrine;
 import net.idotf.events.client.CheatMod;
 import net.idotf.events.client.DifficultyBlocker;
 import net.idotf.events.client.TimerEvent;
+import net.idotf.events.client.renderdistance.RenderDistance;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -26,6 +27,7 @@ public class ClientProxy extends CommonProxy
                 Main.instance,
                 64, 3, true
         );
+        //RenderDistance.init();
         MinecraftForge.EVENT_BUS.register( new CheatMod() );
         TimerEvent.register();
         MinecraftForge.EVENT_BUS.register( new DifficultyBlocker() );

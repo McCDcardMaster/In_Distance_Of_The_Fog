@@ -2,7 +2,6 @@ package net.idotf.events.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -21,8 +20,10 @@ public class CheatMod {
     
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        expectedSequence.add(Keyboard.KEY_H);
+        expectedSequence.add(Keyboard.KEY_M);
         expectedSequence.add(Keyboard.KEY_I);
+        expectedSequence.add(Keyboard.KEY_N);
+        expectedSequence.add(Keyboard.KEY_D);
         
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -40,7 +41,6 @@ public class CheatMod {
         if (Keyboard.getEventKey() == Keyboard.KEY_GRAVE && Keyboard.getEventKeyState()) {
             if (sequenceActive && enteredSequence.equals(expectedSequence)) {
                 if (Minecraft.getMinecraft().player != null) {
-                    Minecraft.getMinecraft().player.sendMessage( new TextComponentString( "Test" ) );
                     MinecraftServer server = Minecraft.getMinecraft().getIntegratedServer();
                     if (server != null) {
                         TimerEvent.triggerRandomEvent( server );
