@@ -13,4 +13,6 @@
 
 #  ⚠️ATTENTION⚠️
 
-#  Epileptics are not recommended to play this mod, as there is no way to disable the bright colors effect yet!
+#  Epileptics, the faint of heart and people with heart problems are not recommended to play this mod, as there is no way to turn off the effect of bright colors, loud sounds!
+
+#  You have been warned...
