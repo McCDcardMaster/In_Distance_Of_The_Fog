@@ -4,56 +4,57 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.lwjgl.opengl.GL11;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.awt.*;
 
+@SideOnly(Side.CLIENT)
 public class Plate13SoundEvent {
+    public static final Plate13SoundEvent INSTANCE = new Plate13SoundEvent();
+    
     private static final String TEXT = "Now playing: C418 - 13";
     private static final int DURATION_TICKS = 250;
+    private static final int FADE_DURATION = 20;
     
-    private static int displayTicks = 0;
-    private static float hue = 0f;
+    private int displayTicks = 0;
+    private float hue = 0f;
+
+    private Plate13SoundEvent() {}
 
     public static void triggerPlateEvent() {
-        displayTicks = DURATION_TICKS;
-        hue = 0f;
+        INSTANCE.displayTicks = DURATION_TICKS;
+        INSTANCE.hue = 0f;
         playSound();
     }
 
     private static void playSound() {
         Minecraft.getMinecraft().getSoundHandler().playSound(
                 new PositionedSoundRecord(
-                        SoundEvents.RECORD_13,
+                        SoundEvents.RECORD_13.getSoundName(),
                         SoundCategory.MUSIC,
                         1.0F,
                         1.0F,
+                        false,
+                        0,
+                        ISound.AttenuationType.NONE,
                         0.0F,
                         0.0F,
                         0.0F
-                ) {
-                    @Override
-                    public float getVolume() {
-                        return 1.0F;
-                    }
-
-                    @Override
-                    public AttenuationType getAttenuationType() {
-                        return ISound.AttenuationType.NONE;
-                    }
-                }
-            );
-        }
+                )
+        );
+    }
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
-        if (displayTicks > 0) {
+        if (event.phase == TickEvent.Phase.END && displayTicks > 0) {
             displayTicks--;
             hue += 0.005f;
             if (hue >= 1f) hue = 0f;
@@ -62,36 +63,41 @@ public class Plate13SoundEvent {
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.TEXT) return;
         if (displayTicks <= 0) return;
+        if (event.getType() != RenderGameOverlayEvent.ElementType.TEXT) return;
 
         Minecraft mc = Minecraft.getMinecraft();
         FontRenderer fr = mc.fontRenderer;
+        ScaledResolution res = new ScaledResolution(mc);
 
-        int screenWidth = event.getResolution().getScaledWidth();
-        int screenHeight = event.getResolution().getScaledHeight();
+        int screenWidth = res.getScaledWidth();
+        int screenHeight = res.getScaledHeight();
 
-        float alpha = MathHelper.clamp(displayTicks / 20f, 0f, 1f);
+        float alpha = MathHelper.clamp(
+            Math.min(displayTicks / (float)FADE_DURATION, 1.0f), 
+            0.0f, 
+            1.0f
+        );
+
         Color color = Color.getHSBColor(hue, 0.8f, 1f);
-        int rgba = (color.getRGB() & 0xFFFFFF) | ((int) (alpha * 255) << 24);
+        int textColor = new Color(
+            color.getRed(),
+            color.getGreen(),
+            color.getBlue(),
+            (int)(alpha * 255)
+        ).getRGB();
+
+        int shadowColor = new Color(0.1f, 0.1f, 0.1f, alpha * 0.8f).getRGB();
 
         int textWidth = fr.getStringWidth(TEXT);
         int posX = (screenWidth - textWidth) / 2;
         int posY = screenHeight - 60;
 
-        renderTextWithEffects(fr, TEXT, posX, posY, rgba, alpha);
+        renderTextWithEffects(fr, TEXT, posX, posY, textColor, shadowColor);
     }
 
-    public static void renderTextWithEffects(FontRenderer fr, String text, int x, int y, int color, float alpha) {
-        GL11.glPushMatrix();
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-        int shadowColor = (0x111111 & 0xFFFFFF) | ((int) (alpha * 100) << 24);
-        fr.drawString(text, x + 1, y + 1, shadowColor, false);
-        fr.drawString(text, x, y, color, false);
-
-        GL11.glDisable(GL11.GL_BLEND);
-        GL11.glPopMatrix();
+    private void renderTextWithEffects(FontRenderer fr, String text, int x, int y, int color, int shadowColor) {
+        fr.drawString(text, x + 1, y + 1, shadowColor);
+        fr.drawString(text, x, y, color);
     }
 }

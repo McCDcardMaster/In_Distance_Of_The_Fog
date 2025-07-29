@@ -1,5 +1,6 @@
 package net.idotf.events.client;
 
+import net.idotf.events.soundevents.RandomMobsSounds;
 import net.idotf.entity.herobrine;
 import net.idotf.events.soundevents.Plate13SoundEvent;
 import net.idotf.events.structures.AirTableStructure;
@@ -15,6 +16,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 
 import java.util.List;
@@ -28,6 +30,7 @@ public class TimerEvent {
     public static final SimpleNetworkWrapper CHANNEL = new SimpleNetworkWrapper("EventChannel");
 
     private enum Events {
+        PLAY_RMS_EVENT,
         PLATE_13_EVENT,
         HEROBRINE_SPAWN,
         GLITCH_EVENT,
@@ -39,9 +42,21 @@ public class TimerEvent {
         HEALTH_REDUCE_EVENT
     }
 
-    public static void register() {
+    public static void registerCommon() {
         MinecraftForge.EVENT_BUS.register(new TimerEvent());
+        
         CHANNEL.registerMessage(TriggerPlateHandler.class, TriggerPlateMessage.class, 0, Side.CLIENT);
+        CHANNEL.registerMessage(TriggerGlitchHandler.class, TriggerGlitchMessage.class, 1, Side.CLIENT);
+        CHANNEL.registerMessage(TriggerRandomSoundHandler.class, TriggerRandomSoundMessage.class, 2, Side.CLIENT);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static void registerClientHandlers() {
+        CHANNEL.registerMessage(TriggerPlateHandler.class, TriggerPlateMessage.class, 0, Side.CLIENT);
+        CHANNEL.registerMessage(TriggerGlitchHandler.class, TriggerGlitchMessage.class, 1, Side.CLIENT);
+        CHANNEL.registerMessage(TriggerRandomSoundHandler.class, TriggerRandomSoundMessage.class, 2, Side.CLIENT);
+        
+        MinecraftForge.EVENT_BUS.register(Plate13SoundEvent.INSTANCE);
     }
 
     @SubscribeEvent
@@ -74,6 +89,9 @@ public class TimerEvent {
         Events selected = Events.values()[random.nextInt(Events.values().length)];
 
         switch(selected) {
+            case PLAY_RMS_EVENT:
+                CHANNEL.sendTo(new TriggerRandomSoundMessage(), target);
+                break;
             case PLATE_13_EVENT:
                 CHANNEL.sendTo(new TriggerPlateMessage(), target);
                 break;
@@ -87,7 +105,7 @@ public class TimerEvent {
                 herobrine.spawnHerobrine(target);
                 break;
             case GLITCH_EVENT:
-                GlitchEvent.startGlitchEffect();
+                CHANNEL.sendTo(new TriggerGlitchMessage(), target);
                 break;
             case TABLE_SPAWN:
                 TableSpawnEvent.spawnSign(target);
@@ -109,10 +127,36 @@ public class TimerEvent {
         @Override public void fromBytes(ByteBuf buf) {}
     }
 
+    public static class TriggerGlitchMessage implements IMessage {
+        @Override public void toBytes(ByteBuf buf) {}
+        @Override public void fromBytes(ByteBuf buf) {}
+    }
+
+    public static class TriggerRandomSoundMessage implements IMessage {
+        @Override public void toBytes(ByteBuf buf) {}
+        @Override public void fromBytes(ByteBuf buf) {}
+    }
+
     public static class TriggerPlateHandler implements IMessageHandler<TriggerPlateMessage, IMessage> {
         @Override
         public IMessage onMessage(TriggerPlateMessage message, MessageContext ctx) {
             Plate13SoundEvent.triggerPlateEvent();
+            return null;
+        }
+    }
+
+    public static class TriggerGlitchHandler implements IMessageHandler<TriggerGlitchMessage, IMessage> {
+        @Override
+        public IMessage onMessage(TriggerGlitchMessage message, MessageContext ctx) {
+            GlitchEvent.startGlitchEffect();
+            return null;
+        }
+    }
+
+    public static class TriggerRandomSoundHandler implements IMessageHandler<TriggerRandomSoundMessage, IMessage> {
+        @Override
+        public IMessage onMessage(TriggerRandomSoundMessage message, MessageContext ctx) {
+            RandomMobsSounds.playRandomSound();
             return null;
         }
     }

@@ -17,7 +17,7 @@ public class CommonProxy
     public void preInit(FMLPreInitializationEvent event) {
 		registerEntities();
         MinecraftForge.TERRAIN_GEN_BUS.register( new DeadForestStructure() );
-        TimerEvent.register();
+        TimerEvent.registerCommon();
         MinecraftForge.EVENT_BUS.register( new DifficultyBlocker() );
     }
 	

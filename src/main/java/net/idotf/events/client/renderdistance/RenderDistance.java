@@ -31,42 +31,38 @@ public class RenderDistance {
         World world = entity.world;
         if (world == null) return;
 
-        if (!entity.isInWater() && !entity.isInLava()) {
-            BlockPos eyePos = new BlockPos(
-                    entity.posX,
-                    entity.posY + entity.getEyeHeight(),
-                    entity.posZ
-            );
+        BlockPos eyePos = new BlockPos(
+                entity.posX,
+                entity.posY + entity.getEyeHeight(),
+                entity.posZ
+        );
+        boolean hasBlockAbove = hasSolidBlockAbove(world, eyePos);
+        boolean isCave = isInCave(world, eyePos);
+        boolean applyGrayFog = hasBlockAbove || isCave;
 
-            boolean hasBlockAbove = hasSolidBlockAbove(world, eyePos);
-            boolean isCave = isInCave(world, eyePos);
-            boolean applyGrayFog = hasBlockAbove || isCave;
+        float celestialAngle = world.getCelestialAngle((float) event.getRenderPartialTicks());
+        float[] baseFogColor = getBaseFogColor(celestialAngle);
 
-            float celestialAngle = world.getCelestialAngle( (float) event.getRenderPartialTicks() );
-            float[] baseFogColor = getBaseFogColor(celestialAngle);
-
-            if (applyGrayFog) {
-                float transitionFactor = calculateTransitionFactor(world, eyePos);
-                event.setRed(transitionFactor * CAVE_FOG_COLOR[0] + (1 - transitionFactor) * baseFogColor[0]);
-                event.setGreen(transitionFactor * CAVE_FOG_COLOR[1] + (1 - transitionFactor) * baseFogColor[1]);
-                event.setBlue(transitionFactor * CAVE_FOG_COLOR[2] + (1 - transitionFactor) * baseFogColor[2]);
-            } else {
-                float dayNightFactor = calculateDayNightFactor(celestialAngle);
-                event.setRed(dayNightFactor * DAY_FOG_COLOR[0] + (1 - dayNightFactor) * NIGHT_FOG_COLOR[0]);
-                event.setGreen(dayNightFactor * DAY_FOG_COLOR[1] + (1 - dayNightFactor) * NIGHT_FOG_COLOR[1]);
-                event.setBlue(dayNightFactor * DAY_FOG_COLOR[2] + (1 - dayNightFactor) * NIGHT_FOG_COLOR[2]);
-            }
+        if (applyGrayFog) {
+            float transitionFactor = calculateTransitionFactor(world, eyePos);
+            event.setRed(transitionFactor * CAVE_FOG_COLOR[0] + (1 - transitionFactor) * baseFogColor[0]);
+            event.setGreen(transitionFactor * CAVE_FOG_COLOR[1] + (1 - transitionFactor) * baseFogColor[1]);
+            event.setBlue(transitionFactor * CAVE_FOG_COLOR[2] + (1 - transitionFactor) * baseFogColor[2]);
+        } else {
+            float dayNightFactor = calculateDayNightFactor(celestialAngle);
+            event.setRed(dayNightFactor * DAY_FOG_COLOR[0] + (1 - dayNightFactor) * NIGHT_FOG_COLOR[0]);
+            event.setGreen(dayNightFactor * DAY_FOG_COLOR[1] + (1 - dayNightFactor) * NIGHT_FOG_COLOR[1]);
+            event.setBlue(dayNightFactor * DAY_FOG_COLOR[2] + (1 - dayNightFactor) * NIGHT_FOG_COLOR[2]);
         }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onFogRender(EntityViewRenderEvent.RenderFogEvent event) {
         Entity entity = event.getEntity();
-        if (!entity.isInWater() && !entity.isInLava()) {
-            GlStateManager.setFog(GlStateManager.FogMode.LINEAR);
-            GlStateManager.setFogStart(FOG_START);
-            GlStateManager.setFogEnd(FOG_END);
-        }
+
+        GlStateManager.setFog(GlStateManager.FogMode.LINEAR);
+        GlStateManager.setFogStart(FOG_START);
+        GlStateManager.setFogEnd(FOG_END);
     }
 
     private static boolean hasSolidBlockAbove(World world, BlockPos pos) {
