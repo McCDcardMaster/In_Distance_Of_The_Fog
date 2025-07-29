@@ -4,9 +4,9 @@ import net.idotf.entity.render.Renderer;
 import net.idotf.entity.herobrine;
 import net.idotf.events.client.CheatMod;
 import net.idotf.events.client.DifficultyBlocker;
-import net.idotf.events.soundevents.Plate13SoundEvent;
 import net.idotf.events.client.TimerEvent;
 import net.idotf.events.client.renderdistance.RenderDistance;
+import net.idotf.events.soundevents.RandomMobsSounds;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -22,8 +22,9 @@ public class ClientProxy extends CommonProxy
         RenderingRegistry.registerEntityRenderingHandler( herobrine.class, Renderer::new);
         RenderDistance.init();
         MinecraftForge.EVENT_BUS.register( new CheatMod() );
-        TimerEvent.register();
+        TimerEvent.registerClientHandlers();
         MinecraftForge.EVENT_BUS.register( new DifficultyBlocker() );
+        MinecraftForge.EVENT_BUS.register( new RandomMobsSounds() );
     }
 
     @Override
