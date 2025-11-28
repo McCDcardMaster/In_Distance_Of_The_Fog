@@ -47,7 +47,6 @@ public class TableSpawnEvent {
     };
     private static final List<String> PROTECTED_WORDS = Arrays.asList("\u00A7cERROR", "\u00A7c:)", "exit()", "\u00A7c|)13!!!!", "\u00A7c|)13 !!!");
 
-
     public static void spawnSign(EntityPlayer player) {
         if (player == null || player.world.isRemote) return;
 

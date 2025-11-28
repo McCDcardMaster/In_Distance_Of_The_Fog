@@ -1,9 +1,10 @@
 package net.idotf.events.client;
 
 import net.idotf.entity.herobrine;
+import net.idotf.events.structures.AirTableStructure;
+import net.idotf.events.structures.PyramidStructure;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -22,6 +23,8 @@ public class TimerEvent {
         HEROBRINE_SPAWN,
         GLITCH_EVENT,
         TABLE_SPAWN,
+        PYRAMID_STRUCTURE,
+        AIR_TABLE_SPAWN,
         ITEM_REMOVE,
         PLAYER_FIRE_EVENT,
         HEALTH_REDUCE_EVENT
@@ -61,8 +64,14 @@ public class TimerEvent {
         Events selected = Events.values()[random.nextInt(Events.values().length)];
 
         switch(selected) {
+            case PYRAMID_STRUCTURE:
+                PyramidStructure.generateNearPlayer(target.world, target.getPosition());
+                break;
+            case AIR_TABLE_SPAWN:
+                AirTableStructure.spawnStructure(target.world, target.getPosition());
+                break;
             case HEROBRINE_SPAWN:
-                spawnHerobrine(target);
+                herobrine.spawnHerobrine(target);
                 break;
             case GLITCH_EVENT:
                 GlitchEvent.startGlitchEffect();
@@ -80,20 +89,5 @@ public class TimerEvent {
                 HitPlayerEvent.deductHealth(target);
                 break;
         }
-    }
-
-    private static void spawnHerobrine(EntityPlayerMP player) {
-        World world = player.world;
-        if (world == null) return;
-
-        double angle = Math.toRadians(player.rotationYaw + 90);
-        double x = player.posX + Math.cos(angle) * 13;
-        double z = player.posZ + Math.sin(angle) * 13;
-        double y = player.posY;
-        
-        herobrine entity = new herobrine(world);
-        entity.setPosition(x, y, z);
-        
-        world.spawnEntity(entity);
     }
 }

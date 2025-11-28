@@ -1,4 +1,4 @@
-package net.idotf.events.client;
+package net.idotf.events.soundevents;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
@@ -13,15 +13,15 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @SideOnly(Side.CLIENT)
-public class HerobrineSpawn {
-    private static final ResourceLocation SOUND_PATH =
-            new ResourceLocation("idotf", "sounds/herobrine/herobrine_spawn.mp3");
+public class GlitchSoundEvent {
+    private static final ResourceLocation SOUND_PATH = 
+            new ResourceLocation("idotf", "sounds/glitch/glitch_sound.mp3");
 
     private static Player audioPlayer;
     private static Thread playerThread;
     private static volatile boolean isPlaying = false;
 
-    public static void playSound() {
+    public static void play() {
         if (isPlaying || Minecraft.getMinecraft().world == null) return;
 
         try {
@@ -39,7 +39,7 @@ public class HerobrineSpawn {
                     closeResources();
                 }
             });
-
+            
             playerThread.start();
 
         } catch (IOException e) {
@@ -47,7 +47,7 @@ public class HerobrineSpawn {
         }
     }
 
-    public static void stopSound() {
+    public static void stop() {
         closeResources();
         if (playerThread != null && playerThread.isAlive()) {
             playerThread.interrupt();

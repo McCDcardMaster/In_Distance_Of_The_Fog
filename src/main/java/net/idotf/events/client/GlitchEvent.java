@@ -1,5 +1,6 @@
 package net.idotf.events.client;
 
+import net.idotf.events.soundevents.GlitchSoundEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -26,7 +27,7 @@ public class GlitchEvent {
             glitchStartTime = System.currentTimeMillis();
             originalAnaglyphState = Minecraft.getMinecraft().gameSettings.anaglyph;
             MinecraftForge.EVENT_BUS.register(new GlitchEvent());
-            GlitchSound.playSoundAutomatically();
+            GlitchSoundEvent.play();
         }
     }
 
@@ -35,7 +36,7 @@ public class GlitchEvent {
             isGlitchActive = false;
             MinecraftForge.EVENT_BUS.unregister(GlitchEvent.class);
             Minecraft.getMinecraft().gameSettings.anaglyph = originalAnaglyphState;
-            GlitchSound.stopSound();
+            GlitchSoundEvent.stop();
 			
 			applyRandomTextureDistortion();
         }
