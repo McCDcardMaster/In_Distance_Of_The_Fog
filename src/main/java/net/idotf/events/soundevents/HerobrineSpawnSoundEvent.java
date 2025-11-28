@@ -14,8 +14,7 @@ import java.io.InputStream;
 
 @SideOnly(Side.CLIENT)
 public class HerobrineSpawnSoundEvent {
-    private static final ResourceLocation SOUND_PATH =
-            new ResourceLocation("idotf", "sounds/herobrine/herobrine_spawn.mp3");
+    private static final ResourceLocation SOUND_PATH = new ResourceLocation("idotf", "sounds/herobrine/herobrine_spawn.mp3");
 
     private static Player audioPlayer;
     private static Thread playerThread;
